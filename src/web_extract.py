@@ -53,7 +53,7 @@ def get_borough_options(pop_data):
 
 def get_london_map():
 
-    if 'greater_london.osm.pbf' not in os.listdir('Data'):
+    if 'greater_london.osm.pbf' not in os.listdir('/home/arindam/Dropbox/FADE/src/Data'):
 
         url = 'http://download.geofabrik.de/europe/great-britain/england/greater-london-latest.osm.pbf'
 
@@ -95,9 +95,9 @@ def get_age_dist(pop_data):
 
     add = ad.set_index('Age')
     add['Greater_London'] = add.sum(axis=1)
-    add.to_csv('Data/age.csv')
+    add.to_csv('/home/arindam/Dropbox/FADE/src/Data/age.csv')
 
 
-    addf = pd.read_csv('Data/age.csv', index_col='Age')
+    addf = pd.read_csv('/home/arindam/Dropbox/FADE/src/Data/age.csv', index_col='Age')
 
     return addf

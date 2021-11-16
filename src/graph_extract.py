@@ -19,8 +19,8 @@ from extract_houses import extract_houses
 
 def extract_region_map(region=None):
     if region != None:
-        if region + '.osm' not in os.listdir('Data'):
-            command = 'osmconvert Data/greater_london.osm.pbf -B=Data/' + region + '.poly -o=Data/' + region +'.osm'
+        if region + '.osm' not in os.listdir('/home/arindam/Dropbox/FADE/src/Data'):
+            command = 'osmconvert /home/arindam/Dropbox/FADE/src/Data/greater_london.osm.pbf -B=Data/' + region + '.poly -o=/home/arindam/Dropbox/FADE/src/Data/' + region +'.osm'
             subprocess.call(command, shell=True)
 
 
@@ -35,7 +35,7 @@ def extract_all_data(current_region, region_population, verbose = False):
     
     if current_region != None:
         
-        if current_region + '_data_combined.csv' not in os.listdir('Data'):
+        if current_region + '_data_combined.csv' not in os.listdir('/home/arindam/Dropbox/FADE/src/Data'):
     
             current_region = current_region.replace(' ', '_')
             map_filename = 'Data/' + current_region + '.osm'
@@ -81,7 +81,7 @@ def get_idx(region=None, osm_id_data=None):
 def get_poly(idx=175342, region='greater_london'):
     
         url = 'https://polygons.openstreetmap.fr/get_poly.py?id=' + str(idx) + '&params=0'
-        if region + '.poly' not in os.listdir('Data'):
+        if region + '.poly' not in os.listdir('/home/arindam/Dropbox/FADE/src/Data'):
             dd = requests.get(url)
             fname = 'Data/' + region + '.poly'
             with open(fname, 'wb') as ff:
@@ -94,7 +94,7 @@ def extract_boundary(region='greater_london', osm_id_data=None, pop_data=None):
         extract_region_map(region)
         extract_all_data(region, get_population(region, pop_data))
     
-    fname = 'Data/' + region + '.poly'
+    fname = '/home/arindam/Dropbox/FADE/src/Data/' + region + '.poly'
     
     with open(fname) as ff:
         s = ff.readlines()[2:-2]

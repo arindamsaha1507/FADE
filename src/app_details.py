@@ -158,7 +158,7 @@ def update_app(n_clicks_collect, n_clicks_simulate, tab, borough, scenario, time
 
     if n_clicks_collect == 0 and n_clicks_simulate == 0:
 
-        subprocess.call('cp Data/age.csv Trial_Data/age-distr.csv', shell=True)
+        subprocess.call('cp /home/arindam/Dropbox/FADE/src/Data/age.csv /home/arindam/Dropbox/FADE/src/Trial_Data/age-distr.csv', shell=True)
         
         s = 'Select a borough and click Prepare Input'
         c = False
@@ -172,7 +172,7 @@ def update_app(n_clicks_collect, n_clicks_simulate, tab, borough, scenario, time
         
     else:
         
-        cmd = 'cp Data/' + borough + '_data_combined.csv Trial_Data/' + borough.lower() + '_buildings.csv'
+        cmd = 'cp /home/arindam/Dropbox/FADE/src/Data/' + borough + '_data_combined.csv /home/arindam/Dropbox/FADE/src/Trial_Data/' + borough.lower() + '_buildings.csv'
         subprocess.call(cmd, shell=True)
 
         
@@ -189,7 +189,7 @@ def update_app(n_clicks_collect, n_clicks_simulate, tab, borough, scenario, time
             if scenario != None and time != None and n_runs != None:
                 for i in range(int(n_runs)):
                     print('Run', i+1)
-                    cmd = './facs_script.sh ' + borough.lower() + ' ' + str(time) + ' ' + scenario
+                    cmd = 'bash /home/arindam/Dropbox/FADE/src/facs_script.sh ' + borough.lower() + ' ' + str(time) + ' ' + scenario
                     subprocess.call(cmd, shell=True)
                 s = 'Run Complete'
             else:
