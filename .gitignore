@@ -5,3 +5,5 @@ src/Data/*
 src/Results/*
 src/Trial_Data/*
 *.pyc
+*.pbf
+*.osm
