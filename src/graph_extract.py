@@ -17,10 +17,10 @@ from extract_houses import extract_houses
 
 # ## Location Map Functions
 
-def extract_region_map(region=None):
+def extract_region_map(region=None, search_path=None):
     if region != None:
-        if region + '.osm' not in os.listdir('/home/arindam/Dropbox/FADE/src/Data'):
-            command = 'osmconvert /home/arindam/Dropbox/FADE/src/Data/greater_london.osm.pbf -B=Data/' + region + '.poly -o=/home/arindam/Dropbox/FADE/src/Data/' + region +'.osm'
+        if region + '.osm' not in os.listdir(search_path):
+            command = 'osmconvert ' + search_path + 'greater_london.osm.pbf -B=' + search_path + region + '.poly -o=' + search_path + region +'.osm'
             subprocess.call(command, shell=True)
 
 
@@ -31,11 +31,11 @@ def get_population(region=None, pop_data=None):
         return 0
 
 
-def extract_all_data(current_region, region_population, verbose = False):
+def extract_all_data(current_region, region_population, verbose=False, path=None):
     
     if current_region != None:
         
-        if current_region + '_data_combined.csv' not in os.listdir('/home/arindam/Dropbox/FADE/src/Data'):
+        if current_region + '_data_combined.csv' not in os.listdir(path):
     
             current_region = current_region.replace(' ', '_')
             map_filename = 'Data/' + current_region + '.osm'
@@ -78,23 +78,23 @@ def get_idx(region=None, osm_id_data=None):
     else:
         return 0
 
-def get_poly(idx=175342, region='greater_london'):
+def get_poly(idx=175342, region='greater_london', path=None):
     
         url = 'https://polygons.openstreetmap.fr/get_poly.py?id=' + str(idx) + '&params=0'
-        if region + '.poly' not in os.listdir('/home/arindam/Dropbox/FADE/src/Data'):
+        if region + '.poly' not in os.listdir(path):
             dd = requests.get(url)
-            fname = 'Data/' + region + '.poly'
+            fname = path + region + '.poly'
             with open(fname, 'wb') as ff:
                 ff.write(dd.content)
 
-def extract_boundary(region='greater_london', osm_id_data=None, pop_data=None):
+def extract_boundary(region='greater_london', osm_id_data=None, pop_data=None, path=None):
     
     if region != 'greater_london':
-        get_poly(get_idx(region, osm_id_data), region)
-        extract_region_map(region)
-        extract_all_data(region, get_population(region, pop_data))
+        get_poly(get_idx(region, osm_id_data), region, path)
+        extract_region_map(region, search_path=path)
+        extract_all_data(region, get_population(region, pop_data), path=path)
     
-    fname = '/home/arindam/Dropbox/FADE/src/Data/' + region + '.poly'
+    fname = path + region + '.poly'
     
     with open(fname) as ff:
         s = ff.readlines()[2:-2]

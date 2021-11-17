@@ -1,5 +1,5 @@
 facs_dir='/home/arindam/Dropbox/Brunel/FACS/facs'
-cur_dir='/home/arindam/Dropbox/FADE/src'
+cur_dir='/home/arindam/Dropbox/FADE/'
 
 runfile='run.py'
 

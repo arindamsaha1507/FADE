@@ -1,9 +1,9 @@
 *.dat
 *.log
 *.csv
-src/Data/*
-src/Results/*
-src/Trial_Data/*
+Data/*
+Results/*
+Trial_Data/*
 *.pyc
 *.pbf
 *.osm

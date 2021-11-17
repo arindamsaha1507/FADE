@@ -47,13 +47,12 @@ def get_borough_options(pop_data):
 
     borough_options = []
     for b in pop_data.Borough:
-    #     borough_options.append({'label': b, 'value': b})
         borough_options.append({'label': b, 'value': b.replace(' ', '_')})
     return borough_options
 
-def get_london_map():
+def get_london_map(search_path):
 
-    if 'greater_london.osm.pbf' not in os.listdir('/home/arindam/Dropbox/FADE/src/Data'):
+    if 'greater_london.osm.pbf' not in os.listdir(search_path):
 
         url = 'http://download.geofabrik.de/europe/great-britain/england/greater-london-latest.osm.pbf'
 
@@ -64,7 +63,7 @@ def get_london_map():
         with open('Data/greater_london.osm.pbf', 'wb') as ff:
             ff.write(r.content)
 
-def get_age_dist(pop_data):
+def get_age_dist(pop_data, store_path):
 
     age_dist = pd.read_csv('https://data.london.gov.uk/download/office-national-statistics-ons-population-estimates-borough/42672cc2-f789-4652-b952-6a332066c804/population-estimates-single-year-age.csv')
     age_dist.Borough = age_dist.Borough.apply(lambda x: x.replace(' ', '_'))
@@ -95,9 +94,9 @@ def get_age_dist(pop_data):
 
     add = ad.set_index('Age')
     add['Greater_London'] = add.sum(axis=1)
-    add.to_csv('/home/arindam/Dropbox/FADE/src/Data/age.csv')
+    add.to_csv(store_path)
 
 
-    addf = pd.read_csv('/home/arindam/Dropbox/FADE/src/Data/age.csv', index_col='Age')
+    addf = pd.read_csv(store_path, index_col='Age')
 
     return addf

@@ -1,0 +1,9 @@
+---
+
+fade_directory: '/home/arindam/Dropbox/FADE/'
+facs_directory: '/home/arindam/Dropbox/Brunel/FACS/facs/'
+
+code_path: 'src/'
+trial_data_path: 'Trial_Data/'
+data_path: 'Data/'
+results_path: 'Results/'

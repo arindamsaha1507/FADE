@@ -1,5 +1,6 @@
 import os
 import subprocess
+import yaml
 
 import dash
 from dash import html, dcc
@@ -12,13 +13,12 @@ from plot_functions import generate_map, dem_plot, plot_results_overall, plot_re
 
 from main_dash import app
 
-def app_design():
+def app_design(file_paths):
 
-    get_london_map()
+    get_london_map(search_path=file_paths['data_path'])
     pop_data = get_pop_table_from_web()
     borough_options = get_borough_options(pop_data)
 
-    # heading = html.H1('**FADE: FACS Application Dashboard for End-users**')
     heading = dcc.Markdown('## **FADE: FACS Application Dashboard for End-users**')
 
     heading1 = html.H4('Select the Scenario')
@@ -60,8 +60,6 @@ def app_design():
             ]
         ),
         
-    #     heading,
-        
         html.H2("Select the Borough"),
         
         html.Div([borough_select], style={'columnCount': 1}),    
@@ -92,8 +90,6 @@ def app_design():
                     dbc.Col(n_runs),
                 ]
             ),
-
-    #             html.Div([heading1, scenario_select, heading2, sim_time], style={'columnCount': 2}),
             
             html.Div([
                 dbc.Button('Run Simulation', id='Execute', n_clicks=0, block=True),
@@ -112,7 +108,6 @@ def app_design():
         html.Div(id='Graphs', style={'columnCount': 2}),
         
         dbc.Collapse([
-    #         html.H2("Input"),
             html.Div([
                 dcc.Graph(id='Map', figure={}),
                 dcc.Graph(id='Population', figure={}),
@@ -121,16 +116,11 @@ def app_design():
         ], is_open=False),
             
         dbc.Collapse([
-    #         html.H2("Output"),
             html.Div([
                 dcc.Graph(id='Result', figure={})        
             ],
                 style={'columnCount': 1}),    
         ], is_open=False),
-
-        
-
-    #     html.Div([graph_3])
 
         ])
 
@@ -150,15 +140,18 @@ def app_design():
     dash.dependencies.State('run_no', 'value'),])
 def update_app(n_clicks_collect, n_clicks_simulate, tab, borough, scenario, time, n_runs):
 
+    with open('src/file_paths.yml', 'r') as f:
+        fp = yaml.safe_load(f)
+
     pop_data = get_pop_table_from_web()
     osm_id_data = get_osm_id_from_web()
-    age_dist_df = get_age_dist(pop_data)
+    age_dist_df = get_age_dist(pop_data, fp['data_path']+'age.csv')
 
     ctx = dash.callback_context
 
     if n_clicks_collect == 0 and n_clicks_simulate == 0:
 
-        subprocess.call('cp /home/arindam/Dropbox/FADE/src/Data/age.csv /home/arindam/Dropbox/FADE/src/Trial_Data/age-distr.csv', shell=True)
+        subprocess.call('cp ' + fp['data_path']+'age.csv ' + fp['trial_data_path']+'age-dist.csv', shell=True)
         
         s = 'Select a borough and click Prepare Input'
         c = False
@@ -172,11 +165,11 @@ def update_app(n_clicks_collect, n_clicks_simulate, tab, borough, scenario, time
         
     else:
         
-        cmd = 'cp /home/arindam/Dropbox/FADE/src/Data/' + borough + '_data_combined.csv /home/arindam/Dropbox/FADE/src/Trial_Data/' + borough.lower() + '_buildings.csv'
+        cmd = 'cp ' + fp['data_path'] + borough + '_data_combined.csv ' + fp['trial_data_path'] + borough.lower() + '_buildings.csv'
         subprocess.call(cmd, shell=True)
 
         
-        fig1 = generate_map(borough, osm_id_data, pop_data)
+        fig1 = generate_map(borough, osm_id_data, pop_data, path=fp['data_path'])
         fig2 = dem_plot(borough, age_dist_df)
         
         s = 'Showing Information about ' + borough
@@ -189,7 +182,7 @@ def update_app(n_clicks_collect, n_clicks_simulate, tab, borough, scenario, time
             if scenario != None and time != None and n_runs != None:
                 for i in range(int(n_runs)):
                     print('Run', i+1)
-                    cmd = 'bash /home/arindam/Dropbox/FADE/src/facs_script.sh ' + borough.lower() + ' ' + str(time) + ' ' + scenario
+                    cmd = 'bash ' + fp['code_path'] + 'facs_script.sh '  + borough.lower() + ' ' + str(time) + ' ' + scenario
                     subprocess.call(cmd, shell=True)
                 s = 'Run Complete'
             else:
@@ -201,8 +194,8 @@ def update_app(n_clicks_collect, n_clicks_simulate, tab, borough, scenario, time
         else:
             res_file = borough.lower() + '-latest.csv'
             if res_file in os.listdir('Results'):
-                fig3 = plot_results_overall('Results/'+res_file)
-                fig4 = plot_results_hospitals('Results/'+res_file)
+                fig3 = plot_results_overall(fp['results_path']+res_file)
+                fig4 = plot_results_hospitals(fp['results_path']+res_file)
                 g = [dcc.Graph(id='Map', figure=fig3), dcc.Graph(id='Population', figure=fig4),]
             else:
                 g = 'Nothing to Show'

@@ -7,12 +7,12 @@ from graph_extract import extract_boundary
 
 # ## Map Plot
 
-def generate_map(region=None, osm_id_data=None, pop_data=None):
+def generate_map(region=None, osm_id_data=None, pop_data=None, path=None):
         
     if region == None:
         region = 'greater_london'
 
-    df = extract_boundary(region, osm_id_data, pop_data)
+    df = extract_boundary(region, osm_id_data, pop_data, path)
     
     df['Type'] = 'boundary'
     df['Area'] = 0
@@ -24,7 +24,7 @@ def generate_map(region=None, osm_id_data=None, pop_data=None):
         zoom = 10.0
     
     if region != 'greater_london':
-        ddf = pd.read_csv('/home/arindam/Dropbox/FADE/src/Data/' + region + '_data_combined.csv', names=['Type', 'Longitude', 'Latitude', 'Area'])
+        ddf = pd.read_csv(path + region + '_data_combined.csv', names=['Type', 'Longitude', 'Latitude', 'Area'])
         fig = px.scatter_mapbox(ddf, lon='Longitude', lat='Latitude', color='Type', zoom=zoom)
         fig.add_trace(px.line_mapbox(df, lon='Longitude', lat='Latitude').data[0])
         fig.update_traces(line=dict(color="Black", width=5))
