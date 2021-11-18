@@ -7,3 +7,4 @@ Trial_Data/*
 *.pyc
 *.pbf
 *.osm
+.ipynb_checkpoints
