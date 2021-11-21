@@ -9,7 +9,8 @@ import dash_bootstrap_components as dbc
 from jupyter_dash import JupyterDash
 
 from web_extract import get_osm_id_from_web, get_age_dist, get_borough_options, get_london_map, get_pop_table_from_web
-from plot_functions import generate_map, dem_plot, plot_results_overall, plot_results_hospitals
+from plot_functions import generate_map, dem_plot, plot_results_overall, plot_results_hospitals, plot_aggregated_data
+# from noise_analysis import plot_aggregated_data
 
 from main_dash import app
 
@@ -102,6 +103,7 @@ def app_design(file_paths):
         dbc.Tabs([
             dbc.Tab(label="Input", tab_id="input_tab"),
             dbc.Tab(label="Output", tab_id="output_tab"),
+            dbc.Tab(label="Past Runs", tab_id="mean_tab"),
 
         ],id='tabs', active_tab='input_tab',),
         
@@ -109,8 +111,8 @@ def app_design(file_paths):
         
         dbc.Collapse([
             html.Div([
-                dcc.Graph(id='Map', figure={}),
-                dcc.Graph(id='Population', figure={}),
+                dcc.Graph(id='Plot_1', figure={}),
+                dcc.Graph(id='Plot_2', figure={}),
             ],
                 style={'columnCount': 2}),    
         ], is_open=False),
@@ -190,14 +192,29 @@ def update_app(n_clicks_collect, n_clicks_simulate, tab, borough, scenario, time
 
         
         if tab == 'input_tab':
-            g = [dcc.Graph(id='Map', figure=fig1), dcc.Graph(id='Population', figure=fig2),]
-        else:
+            g = [dcc.Graph(id='Plot_1', figure=fig1), dcc.Graph(id='Plot_2', figure=fig2),]
+
+        elif tab == 'output_tab':
             res_file = borough.lower() + '-latest.csv'
             if res_file in os.listdir('Results'):
                 fig3 = plot_results_overall(fp['results_path']+res_file)
                 fig4 = plot_results_hospitals(fp['results_path']+res_file)
-                g = [dcc.Graph(id='Map', figure=fig3), dcc.Graph(id='Population', figure=fig4),]
+                g = [dcc.Graph(id='Plot_1', figure=fig3), dcc.Graph(id='Plot_2', figure=fig4),]
             else:
                 g = 'Nothing to Show'
+
+        elif tab == 'mean_tab':
+            res_dir = fp['results_path']
+            scenario = ['no', 'uk']
+            observable = ['infectious', 'num hospitalisations today']
+            fig5 = plot_aggregated_data(borough.lower(), [observable[0]], scenario, res_dir)
+            fig6 = plot_aggregated_data(borough.lower(), [observable[1]], scenario, res_dir)
+            fig5.update_layout(
+                title='No. of infectious people'
+            )
+            fig6.update_layout(
+                title='Daily no. of hospitalisations'
+            )
+            g = [dcc.Graph(id='Plot_1', figure=fig5), dcc.Graph(id='Plot_2', figure=fig6),]
         
     return [s, c, g]

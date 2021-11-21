@@ -1,8 +1,8 @@
+import os
+import numpy as np
 import pandas as pd
-
 import plotly.express as px
 import plotly.graph_objects as go
-
 from graph_extract import extract_boundary
 
 # ## Map Plot
@@ -75,4 +75,74 @@ def plot_results_hospitals(filename):
     
     fig = px.line(df, labels={'value': 'Population', 'time':'No. of Days'}, title='Hospitalisations over Time')
     
+    return fig
+
+## Aggregate Plot
+
+def compile_data(borough, observable, scenario, res_dir):
+
+    file_list = os.listdir(res_dir)
+    borough_files = [res_dir + x for x in file_list if borough in x.split('-') and scenario in x.split('-') and 'latest.csv' not in x.split('-')]
+    df = [pd.read_csv(x) for x in borough_files]
+    ll = list((x[observable] for x in df))
+    for i in range(len(ll)):
+        ll[i].name = 'Trial_' + str(i+1)
+    dd = pd.concat(ll, axis=1)
+
+    assert not dd.isnull().values.any()
+
+    dd['mean'] = dd.mean(axis=1)
+    dd['std'] = dd.std(axis=1)
+    ds = pd.concat([dd['mean'], dd['mean'] + (1.96/np.sqrt(len(ll)))*dd['std'], dd['mean'] - (1.96/np.sqrt(len(ll)))*dd['std']], axis=1)
+    ds = ds.rename(columns={0: 'upper', 1: 'lower'})
+    ds = ds.reset_index()
+    ds = ds.rename(columns={'index': 'time'})
+
+    return ds
+
+def create_traces(ds, obs, label):
+    return [
+        go.Scatter(
+        name=label,
+        x=ds['time'],
+        y=ds['mean'],
+        mode='lines',
+        showlegend=True,
+        ),
+
+        go.Scatter(
+        name='Upper',
+        x=ds['time'],
+        y=ds['upper'],
+        mode='lines',
+        showlegend=False,
+        line=dict(width=0),
+        ),
+
+        go.Scatter(
+        name='Lower',
+        x=ds['time'],
+        y=ds['lower'],
+        mode='lines',
+        showlegend=False,
+        line=dict(width=0),
+        fillcolor='rgba(68, 68, 68, 0.3)',
+        fill='tonexty'
+        )
+    ]
+
+def plot_aggregated_data(borough, observable, scenario, res_dir):
+
+    traces = []
+    for sc in scenario:
+        if sc == 'no':
+            label = 'No measures'
+        elif sc == 'uk':
+            label = 'UK measures'
+        for obs in observable:
+            ds = compile_data(borough, obs, sc, res_dir)
+            traces.extend(create_traces(ds, obs, label=label))
+
+    fig = go.Figure(traces)
+
     return fig
